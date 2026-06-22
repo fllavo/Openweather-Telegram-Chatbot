@@ -19,7 +19,7 @@
       "webhookId": "da45fea4-ba7d-4359-a302-c09e3e27fcbf",
       "credentials": {
         "telegramApi": {
-          "id": "6pg0bpvKvkXcE4Lo",
+          "id": "",
           "name": "Telegram account"
         }
       }
@@ -44,7 +44,7 @@
             },
             {
               "name": "appid",
-              "value": "47eed67e303860133eb3e10dcb7c95fa"
+              "value": ""
             }
           ]
         },
@@ -118,7 +118,7 @@
       "webhookId": "8bbca705-26d6-4030-8cda-9ab36d5870c4",
       "credentials": {
         "telegramApi": {
-          "id": "6pg0bpvKvkXcE4Lo",
+          "id": "",
           "name": "Telegram account"
         }
       }
@@ -140,7 +140,7 @@
       "webhookId": "ee8f101a-9078-49a0-b992-0be3142e48fa",
       "credentials": {
         "telegramApi": {
-          "id": "6pg0bpvKvkXcE4Lo",
+          "id": "",
           "name": "Telegram account"
         }
       }
@@ -257,7 +257,7 @@
       "name": "Google Gemini Chat Model",
       "credentials": {
         "googlePalmApi": {
-          "id": "Xq0kkMKRLskPwU0J",
+          "id": "",
           "name": "Google Gemini(PaLM) Api account"
         }
       }
@@ -406,7 +406,7 @@
   "versionId": "b2fc2bd3-3cf1-40b5-9007-c09368920cfa",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "25c86d41c634206e39f614e932b4ccb315e54e0d1214d3987bec06cf61710505"
+    "instanceId": ""
   },
   "id": "SKkXpxVi4uGYsLZp",
   "tags": []
