@@ -1,0 +1,413 @@
+{
+  "name": "Telegram_Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1600,
+        -640
+      ],
+      "id": "7c9327df-cb12-45dd-aec7-3aaeaf2019e5",
+      "name": "Telegram Trigger",
+      "webhookId": "da45fea4-ba7d-4359-a302-c09e3e27fcbf",
+      "credentials": {
+        "telegramApi": {
+          "id": "6pg0bpvKvkXcE4Lo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.openweathermap.org/data/2.5/weather",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.queue }}"
+            },
+            {
+              "name": "units ",
+              "value": "metric"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            },
+            {
+              "name": "appid",
+              "value": "47eed67e303860133eb3e10dcb7c95fa"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -1168,
+        -640
+      ],
+      "id": "7cb5b70f-0bfa-460a-84f5-2bec26742e66",
+      "name": "HTTP Request",
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1139a54b-1e19-4f2c-bcfa-030bc87ce2fb",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -928,
+        -368
+      ],
+      "id": "39885bac-e3d2-4464-bcf5-a6bc9d0deb22",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        -528
+      ],
+      "id": "70f5399b-f966-4609-9220-0d4c1021c121",
+      "name": "Send a text message",
+      "webhookId": "8bbca705-26d6-4030-8cda-9ab36d5870c4",
+      "credentials": {
+        "telegramApi": {
+          "id": "6pg0bpvKvkXcE4Lo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "❌ Cidade não encontrada. Use o formato Cidade,UF,BR (ex.: São Paulo,SP,BR).",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -704,
+        -160
+      ],
+      "id": "110f5162-43bb-4a28-b27b-1db2ca20fb39",
+      "name": "Send a text message1",
+      "webhookId": "ee8f101a-9078-49a0-b992-0be3142e48fa",
+      "credentials": {
+        "telegramApi": {
+          "id": "6pg0bpvKvkXcE4Lo",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 1. Pega o texto do campo original (mude 'endereco' para o nome do seu campo atual)\nlet texto = $json.message.text || \"\";\n\n// 2. Remove acentos (Ex: \"São José\" vira \"Sao Jose\")\ntexto = texto.normalize(\"NFD\").replace(/[\\u0300-\\u036f]/g, \"\");\n\n// 3. Remove caracteres especiais (mantém apenas letras, números, espaços e vírgulas)\ntexto = texto.replace(/[^a-zA-Z0-9,\\s]/g, \"\");\n\nlet indexVirgula = texto.indexOf(\",\");\n\nif (indexVirgula !== -1) {\n    let antes = texto.slice(0, indexVirgula);\n    let depois = texto.slice(indexVirgula);\n\n    // 4. Aplica as regras de espaços\n    antes = antes.trim().replace(/\\s+/g, \" \");\n    depois = depois.replace(/\\s+/g, \"\");\n\n    texto = antes + depois;\n}\n\n// 5. Salva o resultado diretamente no campo 'queue'\n$input.item.json.queue = texto;\n\n// 6. Retorna o item para o n8n\nreturn $input.item;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1376,
+        -640
+      ],
+      "id": "5d9e85e5-ddf6-4d4f-9cde-793d6eb736b9",
+      "name": "TratarEntrada",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first();\n\n// Captura a temperatura da sua variável de entrada\nconst tempOriginal = item.json.main.temp;\n\n// Salva o valor arredondado no novo campo tempConvertida\nitem.json.tempConvertida = Math.round(tempOriginal);\n\nreturn item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -960,
+        -640
+      ],
+      "id": "f078e8a4-9e7f-436f-80c3-99a40f19cc48",
+      "name": "TrataTemperatura"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ccd495f7-6583-4817-9dfe-3811b39e0e41",
+              "name": "umidade",
+              "value": "={{ $json.main.humidity }}",
+              "type": "number"
+            },
+            {
+              "id": "1e8b9f03-f2e8-4f63-9c6f-caadac9408c6",
+              "name": "condicao",
+              "value": "={{ $json.weather[0].description }}",
+              "type": "string"
+            },
+            {
+              "id": "fdabea81-7979-4a79-b661-0b44097002b0",
+              "name": "vento",
+              "value": "={{ $json.wind.speed }}",
+              "type": "number"
+            },
+            {
+              "id": "202f95ba-5024-45f1-afcb-26a68e954340",
+              "name": "temperatura",
+              "value": "={{ $json.main.temp }}",
+              "type": "number"
+            },
+            {
+              "id": "64905739-438d-4490-9827-b0d15551d7f3",
+              "name": "cidade",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "e5d75d2b-31a0-4f89-8ec2-68e95587de14",
+              "name": "feels_like",
+              "value": "={{ $json.main.feels_like }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -704,
+        -528
+      ],
+      "id": "39cebca7-fc7d-4178-ab49-919dddcdccce",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Voce é um especialista em previsão do Tempo com o objetivo de informar ao usuário as condições do tempo para a cidade informada.\n\nFaça uma resposta em portugues brasil, precisa, descontraida usando a estrutura abaixo.\n\n\nEstrutura:\n\n{emoji_cidade} Clima em {cidade}:\n\nTemperatura: {temperatura}°C \nSensação térmica: {sensacao}°C\nCondição do tempo: {condicao} \nUmidade Relativa do Ar: {umidade}% \n\n{texto_de_retorno}\n\nRegras obrigatórias:\n- Não altere a formatação de saida.\n- Não pergunte nada ao usuário.\n- Não invente informações.\n- Não adicione comentários extras.\n- O texto_de_retorno deve utilizar emojis para condição do tempo, umidade relativa do ar, temperatura e cidade colocando um emoji compativel com os dados, ser amigavel e curto.\n\n\nDados:\nCidade: {{ $json.cidade }}\nSensação: {{ $json.feels_like }}\nTemperatura: {{ $json.temperatura }}\nUmidade: {{ $json.umidade }}\nCondição: {{ $json.condicao }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -496,
+        -528
+      ],
+      "id": "52b91cbb-4d8d-4098-95be-16b5e0c763ba",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -496,
+        -336
+      ],
+      "id": "a2d47bb1-5493-4253-932a-f104e5c8a668",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "Xq0kkMKRLskPwU0J",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Telegram Trigger": [
+      {
+        "json": {
+          "update_id": 142573486,
+          "message": {
+            "message_id": 30,
+            "from": {
+              "id": 168917182,
+              "is_bot": false,
+              "first_name": "Flavio",
+              "last_name": "Nunes",
+              "username": "Flavio_Nunes",
+              "language_code": "pt-br"
+            },
+            "chat": {
+              "id": 168917182,
+              "first_name": "Flavio",
+              "last_name": "Nunes",
+              "username": "Flavio_Nunes",
+              "type": "private"
+            },
+            "date": 1782139714,
+            "text": "Mangaratiba, RJ,  br"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "TratarEntrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "TrataTemperatura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        []
+      ]
+    },
+    "TratarEntrada": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TrataTemperatura": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b2fc2bd3-3cf1-40b5-9007-c09368920cfa",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "25c86d41c634206e39f614e932b4ccb315e54e0d1214d3987bec06cf61710505"
+  },
+  "id": "SKkXpxVi4uGYsLZp",
+  "tags": []
+}
