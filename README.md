@@ -73,7 +73,7 @@ chatbot no Telegram utilizando N8N que informa a temperatura atual de qualquer c
 3. Substitua o valor pela sua **OPENWEATHER_API_KEY**
 4. Clique em **"Save"** ou **"Execute Workflow"** para salvar as alterações
 
-### 5️⃣ Ativar o Workflow
+### 5️ Ativar o Workflow
 
 1. No topo da tela do workflow, certifique-se de que o toggle **"Active"** está ligado (verde)
 2. Verifique se todos os nós estão conectados corretamente
